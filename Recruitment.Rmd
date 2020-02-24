@@ -1,0 +1,278 @@
+---
+title: "Recruitment"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r,results='hide', message=FALSE}
+rm(list=ls())
+library(readxl)
+library(tibble)
+master_code_list <- read_excel("/home/cranilab/Documents/CRANI/Master_code_lists/master_code_list.xlsx")
+
+smart_HC <- 50
+smart_SZ <- 30
+smart_MDD <- 20
+
+cogrehab_HC <- 30
+cogrehab_SZ <- 48
+cogrehab_MDD <- 48
+
+vr_SZ <- 40
+```
+
+***
+<center><font size="4"> **OVERALL** </font> </center>
+####*<span style="color:red">HC</span>*
+#####*<span style="color:blue">total number of healthy controls that have been screened</span>*
+```{r}
+HC <- subset(master_code_list, Diagnosis == "N/A")
+nrow(HC)
+```
+<br>
+
+####*<span style="color:red">SZ</span>*
+#####*<span style="color:blue">total number of schizophrenia/schizoaffective patients that have been screened</span>*
+```{r}
+SZ <- subset(master_code_list, substr(master_code_list$Diagnosis, 1, 2) == "Sc")
+nrow(SZ) 
+```
+<br>
+
+####*<span style="color:red">MDD</span>*
+#####*<span style="color:blue">total number of depression patients that have been screened</span>*
+```{r}
+MDD <- subset(master_code_list, substr(master_code_list$Diagnosis, 1, 2) == "De")
+nrow(MDD) 
+```
+<br>
+
+####*<span style="color:red">OTHER</span>*
+#####*<span style="color:blue">total number of people with other diagnoses</span>*
+```{r}
+Other <- subset(master_code_list, Diagnosis !="N/A" & substr(master_code_list$Diagnosis, 1, 2) != "Sc" & substr(master_code_list$Diagnosis, 1, 2) != "De")
+nrow(Other)
+```
+<br>
+
+#####*<span style="color:blue">list the diagnoses</span>*
+```{r}
+print(data.frame(Other$Screening_ID, Other$Diagnosis))
+```
+***
+<center><font size="4"> **SMARTPHONE** </font> </center>
+####*<span style="color:red">HC</span>*
+#####*<span style="color:blue">number of healthy controls eligible to participate in smartphone study</span>*
+```{r}
+nrow(subset(HC, Smart_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of healthy controls NOT eligible to particiapte in smartphone study</span>*
+```{r}
+nrow(HC)-nrow(subset(HC, Smart_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of healthy controls particiapted in smartphone study</span>*
+```{r}
+nrow(subset(HC, Smart_ID != "NA")) 
+```
+
+<br>
+
+#####*<span style="color:blue">number of additional healthy controls needed in smartphone study</span>*
+```{r}
+smart_HC-nrow(subset(HC, Smart_ID != "NA")) 
+```
+
+
+<br>
+
+####*<span style="color:red">SZ</span>*
+#####*<span style="color:blue">number of schizophrenia/schizoaffective patients eligible to participate in smartphone study</span>*
+```{r}
+nrow(subset(SZ, Smart_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of schizophrenia/schizoaffective patients NOT eligible to particiapte in smartphone study</span>*
+```{r}
+nrow(SZ)-nrow(subset(SZ, Smart_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of schizophrenia/schizoaffective patients particiapted in smartphone study</span>*
+```{r}
+nrow(subset(SZ, Smart_ID != "NA")) 
+```
+<br>
+
+#####*<span style="color:blue">number of additional schizophrenia/schizoaffective patients needed in smartphone study</span>*
+```{r}
+smart_SZ-nrow(subset(SZ, Smart_ID != "NA")) 
+```
+
+
+<br>
+
+####*<span style="color:red">MDD</span>*
+#####*<span style="color:blue">number of depression patients eligible to participate in smartphone study</span>*
+```{r}
+nrow(subset(MDD, Smart_Inclusion == "Yes"))
+```
+<br>
+
+#####*<span style="color:blue">number of depression patients NOT eligible to particiapte in smartphone study</span>*
+```{r}
+nrow(MDD)-nrow(subset(MDD, Smart_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of depression patients particiapted in smartphone study</span>*
+```{r}
+nrow(subset(MDD, Smart_ID != "NA")) 
+```
+
+<br>
+
+#####*<span style="color:blue">number of additional depression patients needed in smartphone study</span>*
+```{r}
+smart_MDD-nrow(subset(MDD, Smart_ID != "NA")) 
+```
+
+***
+<center><font size="4"> **VR PILOT** </font> </center>
+####*<span style="color:red">SZ</span>*
+#####*<span style="color:blue">number of schizophrenia/schizoaffective patients eligible to participate in VR pilot study</span>*
+```{r}
+nrow(subset(SZ, VR_Inclusion == "Yes"))
+```
+<br>
+
+#####*<span style="color:blue">number of chizophrenia/schizoaffective patients NOT eligible to particiapte in VR pilot study</span>*
+```{r}
+nrow(SZ)-nrow(subset(SZ, VR_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of schizophrenia/schizoaffective patients particiapted in VR pilot study</span>*
+```{r}
+nrow(subset(SZ, VR_ID != "NA")) 
+```
+
+<br>
+
+#####*<span style="color:blue">number of additional schizophrenia/schizoaffective patients needed in VR pilot study</span>*
+```{r}
+vr_SZ-nrow(subset(SZ, VR_ID != "NA")) 
+```
+
+***
+<center><font size="4"> **COGREHAB** </font> </center>
+####*<span style="color:red">HC</span>*
+#####*<span style="color:blue">number of healthy controls eligible to participate in CogRehab</span>*
+```{r}
+nrow(subset(HC, CogRehab_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of healthy controls NOT eligible to particiapte in CogRehab</span>*
+```{r}
+nrow(HC)-nrow(subset(HC, CogRehab_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of healthy controls particiapted in CogRehab</span>*
+```{r}
+nrow(subset(HC, CogRehab_ID != "NA")) 
+```
+<br>
+
+#####*<span style="color:blue">number of additional healthy controls needed in CogRehab</span>*
+```{r}
+cogrehab_HC-nrow(subset(HC, CogRehab_ID != "NA")) 
+```
+
+
+<br>
+
+####*<span style="color:red">SZ</span>*
+#####*<span style="color:blue">number of schizophrenia/schizoaffective patients eligible to participate in CogRehab</span>*
+```{r}
+nrow(subset(SZ, CogRehab_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of schizophrenia/schizoaffective patients NOT eligible to particiapte in CogRehab</span>*
+```{r}
+nrow(SZ)-nrow(subset(SZ, CogRehab_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of schizophrenia/schizoaffective patients particiapted in CogRehab</span>*
+```{r}
+nrow(subset(SZ, CogRehab_ID != "NA")) 
+```
+
+<br>
+
+#####*<span style="color:blue">number of additional schizophrenia/schizoaffective patients needed in CogRehab</span>*
+```{r}
+cogrehab_SZ-nrow(subset(SZ, CogRehab_ID != "NA")) 
+```
+
+
+<br>
+
+####*<span style="color:red">MDD</span>*
+#####*<span style="color:blue">number of depression patients eligible to participate in CogRehab</span>*
+```{r}
+nrow(subset(MDD, CogRehab_Inclusion == "Yes"))
+```
+<br>
+
+#####*<span style="color:blue">number of depression patients NOT eligible to particiapte in CogRehab</span>*
+```{r}
+nrow(MDD)-nrow(subset(MDD, CogRehab_Inclusion == "Yes")) 
+```
+<br>
+
+#####*<span style="color:blue">number of depression patients particiapted in CogRehab</span>*
+```{r}
+nrow(subset(MDD, CogRehab_ID != "NA")) 
+```
+<br>
+
+#####*<span style="color:blue">number of additional depression patients needed in CogRehab</span>*
+```{r}
+cogrehab_MDD-nrow(subset(MDD, CogRehab_ID != "NA")) 
+```
+
+
+***
+<center><font size="4"> **REASONS FOR EXCLUSION** </font> </center>
+####*<span style="color:red">HC</span>*
+```{r}
+HC_EX <- subset(HC, CogRehab_Inclusion != "Yes" | Smart_Inclusion != "Yes")
+print(tibble(HC_EX$Screening_ID, HC_EX$CogRehab_Inclusion, HC_EX$Smart_Inclusion))
+```
+<br>
+
+####*<span style="color:red">SZ</span>*
+```{r}
+SZ_EX <- subset(SZ, CogRehab_Inclusion != "Yes" | Smart_Inclusion != "Yes" | VR_Inclusion != "Yes")
+print(tibble(SZ_EX$Screening_ID, SZ_EX$CogRehab_Inclusion, SZ_EX$Smart_Inclusion, SZ_EX$VR_Inclusion))
+```
+<br>
+
+####*<span style="color:red">MDD</span>*
+```{r}
+MDD_EX <- subset(MDD, CogRehab_Inclusion != "Yes" | Smart_Inclusion != "Yes")
+print(tibble(MDD_EX$Screening_ID, MDD_EX$CogRehab_Inclusion, MDD_EX$Smart_Inclusion))
+```
