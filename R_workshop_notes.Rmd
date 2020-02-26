@@ -1,0 +1,368 @@
+---
+title: "R Workshop Notes"
+author: "by Feng Gu"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_notebook
+---
+<br>
+<br>
+<br>
+
+
+##### *<span style="color:red">1. R Console and R Studio</span>*
+- Interface and navigation
+
+<br>
+
+##### *<span style="color:red">2. Libraries/Packages </span>*
+- Installing a library 
+```{r, results='hide'}
+#install.packages("psych")
+#install.packages("lme4")
+#install.packages("ggplot2")
+```
+
+<br>
+
+- Loading a library
+```{r, results='hide'}
+library(psych)
+library(readxl)
+library(lme4)
+library(lmerTest)
+library(ggplot2)
+```
+
+<br>
+<br>
+
+##### *<span style="color:red">3. Importing Data</span>*
+- Ways of importing
+  - From graphical user interface
+    - Import Dataset
+  - From script
+```{r, results='hide', error=TRUE}
+excel <- read_excel("E:/Documents/data.xlsx")
+
+csv <- read.csv("E:/Documents/data.csv")
+
+text <- read.table("E:/Documents/data.txt")
+```
+
+  <br>
+  
+   - For pre-installed datasets
+
+```{r}
+data("Tal.Or")
+```
+
+<br>
+
+- Viewing data
+  - From graphical user interface
+    - Clicking works!
+  - From script
+```{r}
+View(Tal.Or)
+```
+
+<br>
+
+##### *<span style="color:red">4. Basic Commands</span>*
+- Making notes
+```{r}
+#This is a note
+```
+
+<br>
+
+- Getting help
+```{r}
+?mean
+```
+
+<br>
+
+- Scientific notation
+```{r}
+options(scipen=0) #turn on
+options(scipen=999) #turn off
+```
+
+<br>
+
+- Assignment
+```{r}
+my_data <- Tal.Or
+```
+
+<br>
+
+- Referring to a variable
+```{r}
+print(my_data$age)
+```
+
+<br>
+
+- Attaching and detaching
+```{r, error=TRUE}
+attach(Tal.Or)
+print(age) #can refer to names of variables directly
+detach(Tal.Or)
+```
+
+<br>
+
+- Removing a data frame
+```{r}
+rm(Tal.Or)
+```
+
+<br>
+<br>
+
+##### *<span style="color:red">5. Data Types</span>*
+- Checking data types
+  - Numeric 
+  - Character
+  - Factor
+```{r}
+str(my_data$age)
+str(my_data$cond)
+str(my_data$gender)
+```
+ 
+ <br>
+
+- Changing data types
+```{r}
+my_data$cond <- as.factor(my_data$cond)
+str(my_data$cond)
+
+my_data$gender <- as.factor(my_data$gender)
+str(my_data$gender)
+```
+  
+<br>
+<br>
+  
+##### *<span style="color:red">6. Descriptive Statistics</span>*
+
+```{r}
+mean(my_data$age)
+```
+
+<br>
+
+```{r}
+sd(my_data$age)
+```
+
+<br>
+
+```{r}
+summary(my_data)
+```
+
+<br>
+
+```{r}
+describe(my_data) 
+```
+
+<br>
+<br>
+
+##### *<span style="color:red">7. Correlation</span>*
+
+```{r}
+corr.test(my_data$pmi, my_data$import) #get correlation of two variables 
+matrix <- data.frame(my_data$pmi, my_data$import, my_data$reaction, my_data$age)
+corr.test(matrix) #get a correlation matrix of many variables
+```
+
+<br>
+<br>
+
+##### *<span style="color:red">8. t-test</span>*
+
+##### *<span style="color:blue">IMPORTANT: the use of t-test function depends on data structure</span>*
+
+- independent sample t-test
+
+```{r}
+#if there is a predictor variable that has 2 levels and one dependent variable, use tilde (~). In this example, condition is a predicting varialbe with 2 levels: 
+
+t.test(my_data$reaction~my_data$cond) #R assumes unequal variances
+t.test(my_data$reaction~my_data$cond, var.equal=TRUE) #if you know the variances are equal
+
+```
+
+<br>
+
+```{r}
+#if there is no predicting variable, and you'd like to compare two variables directly, use comma (,). In this exmaple, the height of parents and the height of children are two independent variabes and you would like to see if they are statistically different: 
+
+data("galton")
+t <- galton
+
+t.test(t$parent,t$child)
+
+```
+
+
+<br>
+
+- paired sample t-test
+
+```{r}
+
+#suppose we want to see if being a parent changes a person's height (i.e., same sample tested twice)
+
+t.test(t$parent, t$child, paired = TRUE, alternative = "two.sided")
+```
+
+<br>
+
+- one sample t-test
+
+```{r}
+#if mu is not specified, it is assumed to be 0.
+normal_height <- 60
+t.test(t$child, mu = normal_height)
+```
+
+<br>
+<br>
+
+##### *<span style="color:red">9. ANOVA</span>*
+
+- one-way ANOVA
+
+```{r}
+data("withinBetween") #load a new pre-installed dataset
+aov_example <- withinBetween
+model <- aov(aov_example$V1~aov_example$Group)
+summary(model)
+
+```
+
+<br>
+
+- post hoc pairwise comparison
+
+```{r}
+#Bonferroni Procedure
+pairwise.t.test(aov_example$V1, aov_example$Group, p.adj = "bonf")
+#Tukey HSD
+TukeyHSD(model)
+```
+
+<br>
+
+- two-way ANOVA with interaction
+
+```{r}
+
+model2 <- aov(my_data$reaction ~ my_data$cond * my_data$pmi)
+summary(model2)
+
+```
+
+<br>
+<br> 
+
+##### *<span style="color:red">10. Linear Regression</span>*
+
+```{r}
+data("tai")
+
+lm1 <- lm(tai$pleasant ~ tai$worry + tai$difficulties + tai$rested)
+
+summary(lm1)
+
+#OR you can call the variables directly and specify the dataframe
+
+lm2 <- lm(pleasant ~ worry + difficulties + rested, data=tai)
+summary(lm2)
+```
+
+<br>
+<br>
+
+##### *<span style="color:red">11. Linear Mixed Model with Random Effects</span>*
+
+```{r}
+
+#setting id and study as two factors with random effects
+
+mixed_model <- lmer(pleasant ~ worry + difficulties + rested + (1|id) + (1|study), data = tai)
+
+summary(mixed_model)
+```
+
+<br>
+<br>
+
+##### *<span style="color:red">12. Plotting </span>*
+
+- histogram 
+```{r}
+hist(my_data$reaction)
+
+ggplot(data=my_data, aes(x=reaction)) + 
+         geom_histogram(bins = 50, binwidth = .1, color="white", fill="red")
+```
+
+<br>
+
+- scatter plot
+```{r}
+ggplot(data = my_data, aes(x = pmi, y = reaction))+ 
+  geom_point()
+
+
+#a scatter plot and a linear model, with confidence intervals shaded in grey
+ggplot(data = my_data, aes(x = pmi, y = reaction)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+
+#a scatter plot and a linear model, with confidence intervals shaded in grey, with axis labels and titles changed and centred
+ggplot(data = my_data, aes(x = pmi, y = reaction)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  labs(x = "pmi_value", y = "reaction_value", title = "This is a graph") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+#You can modify colors too!
+ggplot(data = my_data, aes(x = pmi, y = reaction)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm", color = "red") + 
+  labs(x = "pmi_value", y = "reaction_value", title = "This is a graph") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+<br>
+
+[Click here to check all kinds of parameters of ggplot!!](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+
+<br>
+<br>
+
+##### *<span style="color:red">13. R Markdown and R Notebook </span>*
+
+- Difference between R Markdown and R Notebook
+- How to create a new document 
+- Formatting
+- Running and knitting 
+- Options for each chunk of R codes
+
+[Click here to check some common parameters of R Markdown/R Notebook!!](https://rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
+
+<br>
+<br>
