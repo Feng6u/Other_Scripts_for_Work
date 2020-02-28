@@ -1,0 +1,264 @@
+---
+title: "ITC singlepulse results"
+output: html_notebook
+---
+
+```{r, results='hide'}
+rm(list = ls()) #start with a clean environment
+
+options(scipen=999) #turn off scientific notation in the entire script
+
+library(readxl) #load libraries needed for this script
+library(dplyr)
+library(lme4)
+library(lmerTest)
+library(Rmisc)
+library(ggplot2)
+
+############################################################ SETTING UP DATA FILE ######################################################
+
+condition1_pre <- lapply(Sys.glob("~/Desktop/Wavelet_2/Singlepulse/Singlepulse_1_*.xlsx"), read_excel)
+for (i in 1:length(condition1_pre)){
+  condition1_pre[[i]] <- condition1_pre[[i]][,c(1,3)]
+  condition1_pre[[i]]$time <- rep(colnames(condition1_pre[[i]][2], nrow(condition1_pre[[i]])))
+  condition1_pre[[i]]$freq <- rep(colnames(condition1_pre[[i]][2], nrow(condition1_pre[[i]])))
+  names(condition1_pre[[i]])[2] <- "value"
+  condition1_pre[[i]]$time <- substr(condition1_pre[[i]]$time, 4, 6)
+  condition1_pre[[i]]$freq <- substr(condition1_pre[[i]]$freq, 12, 17)
+  condition1_pre[[i]]$condition <- "1" 
+}
+condition1_pre <- bind_rows(condition1_pre) #create one new dataframe combining all data files for condition1_pre
+
+
+condition1_post <- lapply(Sys.glob("~/Desktop/Wavelet_2/Singlepulse/Singlepulse_1_*.xlsx"), read_excel)
+for (i in 1:length(condition1_post)){
+  condition1_post[[i]] <- condition1_post[[i]][,c(1,5)]
+  condition1_post[[i]]$time <- rep(colnames(condition1_post[[i]][2], nrow(condition1_post[[i]])))
+  condition1_post[[i]]$freq <- rep(colnames(condition1_post[[i]][2], nrow(condition1_post[[i]])))
+  names(condition1_post[[i]])[2] <- "value"
+  condition1_post[[i]]$time <- substr(condition1_post[[i]]$time, 4, 7)
+  condition1_post[[i]]$freq <- substr(condition1_post[[i]]$freq, 13, 18)
+  condition1_post[[i]]$condition <- "1" 
+}
+condition1_post <- bind_rows(condition1_post) #create one new dataframe combining all data files for condition1_post
+
+condition1 <- rbind(condition1_pre, condition1_post)
+
+
+condition2_pre <- lapply(Sys.glob("~/Desktop/Wavelet_2/Singlepulse/Singlepulse_2_*.xlsx"), read_excel)
+for (i in 1:length(condition2_pre)){
+  condition2_pre[[i]] <- condition2_pre[[i]][,c(1,3)]
+  condition2_pre[[i]]$time <- rep(colnames(condition2_pre[[i]][2], nrow(condition2_pre[[i]])))
+  condition2_pre[[i]]$freq <- rep(colnames(condition2_pre[[i]][2], nrow(condition2_pre[[i]])))
+  names(condition2_pre[[i]])[2] <- "value"
+  condition2_pre[[i]]$time <- substr(condition2_pre[[i]]$time, 4, 6)
+  condition2_pre[[i]]$freq <- substr(condition2_pre[[i]]$freq, 12, 17)
+  condition2_pre[[i]]$condition <- "2" 
+}
+condition2_pre <- bind_rows(condition2_pre) #create one new dataframe combining all data files for condition2_pre
+
+
+condition2_post <- lapply(Sys.glob("~/Desktop/Wavelet_2/Singlepulse/Singlepulse_2_*.xlsx"), read_excel)
+for (i in 1:length(condition2_post)){
+  condition2_post[[i]] <- condition2_post[[i]][,c(1,5)]
+  condition2_post[[i]]$time <- rep(colnames(condition2_post[[i]][2], nrow(condition2_post[[i]])))
+  condition2_post[[i]]$freq <- rep(colnames(condition2_post[[i]][2], nrow(condition2_post[[i]])))
+  names(condition2_post[[i]])[2] <- "value"
+  condition2_post[[i]]$time <- substr(condition2_post[[i]]$time, 4, 7)
+  condition2_post[[i]]$freq <- substr(condition2_post[[i]]$freq, 13, 18)
+  condition2_post[[i]]$condition <- "2" 
+}
+condition2_post <- bind_rows(condition2_post) #create one new dataframe combining all data files for condition2_post
+
+condition2 <- rbind(condition2_pre, condition2_post)
+
+
+condition3_pre <- lapply(Sys.glob("~/Desktop/Wavelet_2/Singlepulse/Singlepulse_3_*.xlsx"), read_excel)
+for (i in 1:length(condition3_pre)){
+  condition3_pre[[i]] <- condition3_pre[[i]][,c(1,3)]
+  condition3_pre[[i]]$time <- rep(colnames(condition3_pre[[i]][2], nrow(condition3_pre[[i]])))
+  condition3_pre[[i]]$freq <- rep(colnames(condition3_pre[[i]][2], nrow(condition3_pre[[i]])))
+  names(condition3_pre[[i]])[2] <- "value"
+  condition3_pre[[i]]$time <- substr(condition3_pre[[i]]$time, 4, 6)
+  condition3_pre[[i]]$freq <- substr(condition3_pre[[i]]$freq, 12, 17)
+  condition3_pre[[i]]$condition <- "3" 
+}
+condition3_pre <- bind_rows(condition3_pre) #create one new dataframe combining all data files for condition3_pre
+
+
+condition3_post <- lapply(Sys.glob("~/Desktop/Wavelet_2/Singlepulse/Singlepulse_3_*.xlsx"), read_excel)
+for (i in 1:length(condition3_post)){
+  condition3_post[[i]] <- condition3_post[[i]][,c(1,5)]
+  condition3_post[[i]]$time <- rep(colnames(condition3_post[[i]][2], nrow(condition3_post[[i]])))
+  condition3_post[[i]]$freq <- rep(colnames(condition3_post[[i]][2], nrow(condition3_post[[i]])))
+  names(condition3_post[[i]])[2] <- "value"
+  condition3_post[[i]]$time <- substr(condition3_post[[i]]$time, 4, 7)
+  condition3_post[[i]]$freq <- substr(condition3_post[[i]]$freq, 13, 18)
+  condition3_post[[i]]$condition <- "3" 
+}
+condition3_post <- bind_rows(condition3_post) #create one new dataframe combining all data files for condition3_post
+
+condition3 <- rbind(condition3_pre, condition3_post)
+
+ITC <- bind_rows(condition1, condition2, condition3)
+ITC$freq <- gsub("5__7", "theta", ITC$freq)
+ITC$freq <- gsub("8__12", "alpha", ITC$freq)
+ITC$freq <- gsub("13__29", "beta", ITC$freq)
+ITC$freq <- gsub("30__45", "gamma", ITC$freq)
+ITC$freq <- gsub("theta_t", "theta", ITC$freq)
+ITC$freq <- gsub("_", "", ITC$freq)
+
+rm(list=setdiff(ls(), "ITC")) #get a cleaner environment (leave only "ITC" in environment)
+
+ITC$condition <- as.factor(ITC$condition) #set condition as a categorical variable
+ITC$time <- as.factor(ITC$time) #set time as a categorical variable
+ITC$freq <- as.factor(ITC$freq) #set frequency as a categorical variable
+
+
+##################################### Creating different subsets of data for each requency band #######################
+
+
+theta <- subset(ITC, ITC$freq == "theta") 
+alpha <- subset(ITC, ITC$freq == "alpha") 
+beta <- subset(ITC, ITC$freq == "beta") 
+gamma <- subset(ITC, ITC$freq == "gamma") 
+```
+***
+<center><font size="4"> **Statistical Analyses for ITC Single Pulse** </font> </center>
+###*<span style="color:blue">theta</span>*
+```{r}
+###### a mixed model analysis with participant ID as a random factor for theta
+model_theta <- lmer(value ~ condition + time + condition*time + (1|Subjects), theta)
+anova(model_theta)
+
+theta_descriptive <- summarySE(theta, measurevar="value", groupvars=c("condition","time")) #descriptive stats of the theta frequency band
+
+```
+#####*<span style="color:red">Graph of group means with standard error as error bars</span>*
+```{r}
+#graph for theta
+ggplot(theta_descriptive, aes(x=time, y=value, color=condition, group=condition)) +
+  geom_line(position = position_dodge(.3)) +
+  geom_pointrange(aes(ymin=value-se, ymax=value+se), 
+                  position = position_dodge(.3)) +
+  ylab("Value") +
+  xlab("Time") +
+  theme_bw()
+
+```
+
+#####*<span style="color:red">Graph for linear mixed effects model</span>*
+```{r}
+theta_graph1<-ggplot(data = theta, aes(y=value, x=time, colour=condition))+geom_smooth(method="lm" , fill="snow3", fullrange=TRUE) + scale_colour_manual(values = c("coral1", "azure4","aquamarine3"))
+theta_graph2<- theta_graph1 + theme_classic()
+theta_graph2 + geom_line(data = theta, aes(x =time, y = value, group = Subjects), colour="#99999950") + geom_point(aes(shape=condition,colour=condition))
+
+```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+###*<span style="color:blue">alpha</span>*
+```{r}
+###### a mixed model analysis with participant ID as a random factor for alpha
+model_alpha <- lmer(value ~ condition + time + condition*time + (1|Subjects), alpha)
+anova(model_alpha)
+
+alpha_descriptive <- summarySE(alpha, measurevar="value", groupvars=c("condition","time")) #descriptive stats of the alpha frequency band
+
+```
+#####*<span style="color:red">Graph of group means with standard error as error bars</span>*
+```{r}
+#graph for alpha
+ggplot(alpha_descriptive, aes(x=time, y=value, color=condition, group=condition)) +
+  geom_line(position = position_dodge(.3)) +
+  geom_pointrange(aes(ymin=value-se, ymax=value+se), 
+                  position = position_dodge(.3)) +
+  ylab("Value") +
+  xlab("Time") +
+  theme_bw()
+```
+
+#####*<span style="color:red">Graph for linear mixed effects model</span>*
+```{r}
+alpha_graph1<-ggplot(data = alpha, aes(y=value, x=time, colour=condition))+geom_smooth(method="lm" , fill="snow3", fullrange=TRUE) + scale_colour_manual(values = c("coral1", "azure4","aquamarine3"))
+alpha_graph2<- alpha_graph1 + theme_classic()
+alpha_graph2 + geom_line(data = alpha, aes(x =time, y = value, group = Subjects), colour="#99999950") + geom_point(aes(shape=condition,colour=condition))
+
+
+```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+###*<span style="color:blue">beta</span>*
+```{r}
+###### a mixed model analysis with participant ID as a random factor for beta
+model_beta <- lmer(value ~ condition + time + condition*time + (1|Subjects), beta)
+anova(model_beta)
+
+beta_descriptive <- summarySE(beta, measurevar="value", groupvars=c("condition","time")) #descriptive stats of the beta frequency band
+
+```
+
+#####*<span style="color:red">Graph of group means with standard error as error bars</span>*
+```{r}
+#graph for beta
+ggplot(beta_descriptive, aes(x=time, y=value, color=condition, group=condition)) +
+  geom_line(position = position_dodge(.3)) +
+  geom_pointrange(aes(ymin=value-se, ymax=value+se), 
+                  position = position_dodge(.3)) +
+  ylab("Value") +
+  xlab("Time") +
+  theme_bw()
+```
+
+#####*<span style="color:red">Graph for linear mixed effects model</span>*
+```{r}
+beta_graph1<-ggplot(data = beta, aes(y=value, x=time, colour=condition))+geom_smooth(method="lm" , fill="snow3", fullrange=TRUE) + scale_colour_manual(values = c("coral1", "azure4","aquamarine3"))
+beta_graph2<- beta_graph1 + theme_classic()
+beta_graph2 + geom_line(data = beta, aes(x =time, y = value, group = Subjects), colour="#99999950") + geom_point(aes(shape=condition,colour=condition))
+
+```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+###*<span style="color:blue">gamma</span>*
+```{r}
+###### a mixed model analysis with participant ID as a random factor for gamma
+model_gamma <- lmer(value ~ condition + time + condition*time + (1|Subjects), gamma) 
+anova(model_gamma)
+
+gamma_descriptive <- summarySE(gamma, measurevar="value", groupvars=c("condition","time")) #descriptive stats of the gamma frequency band
+
+```
+#####*<span style="color:red">Graph of group means with standard error as error bars</span>*
+```{r}
+#graph for gamma
+ggplot(gamma_descriptive, aes(x=time, y=value, color=condition, group=condition)) +
+  geom_line(position = position_dodge(.3)) +
+  geom_pointrange(aes(ymin=value-se, ymax=value+se), 
+                  position = position_dodge(.3)) +
+  ylab("Value") +
+  xlab("Time") +
+  theme_bw()
+```
+
+#####*<span style="color:red">Graph for linear mixed effects model</span>*
+```{r}
+gamma_graph1<-ggplot(data = gamma, aes(y=value, x=time, colour=condition))+geom_smooth(method="lm" , fill="snow3", fullrange=TRUE) + scale_colour_manual(values = c("coral1", "azure4","aquamarine3"))
+gamma_graph2<- gamma_graph1 + theme_classic()
+gamma_graph2 + geom_line(data = gamma, aes(x =time, y = value, group = Subjects), colour="#99999950") + geom_point(aes(shape=condition,colour=condition))
+
+```
